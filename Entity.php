@@ -2,6 +2,8 @@
     require("CSVHelper.php");
     require("JSONHelper.php");
     class Entity{
+        //unfortunately, file is not a class and $file will always be a string, there for CSVHelper and JSONHelper have the exact same method signatures and we can't 
+        //use cool polymorphism but rather an ugly if-else. 
         static function read($file, $offset=null, $limit=null){
             
             

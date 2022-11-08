@@ -2,20 +2,16 @@
 class CSVHelper
 {
     private static $obfuscator='<?php die() ?>';
-    //to-do: turn this into a class
-    //we use PHP built in fgetcsv method.
-    //We check a few conditions and turn blank lines into empty arrays to avoid NULLs when converting from array back to csv
-    //csvToArray() takes url, reads file referenced by url and returns array
+    //The big idea here is to use almost he same method sigiture as those in JSONHelper example, although not with too many parameter options.
+    //Hopefully we can use some polymorphism and make Entity.php super simple. 
+    //all csv methods will have a different output than its json equivalent, as we can't universally represent an associative relationship in csv
+    //Takes a file, and reads, optional null and offset options
     static function read($file, $offset=null, $limit=null)
     {
         if(!file_exists($file)) return [];
 		if(!isset(PATHINFO($file)['extension'])) return [];
         $rows=[];
-        //we read the contents of the file if we do not intend to overwrite the file
-
-
-        
-
+        //Reading the file 
         if(file_exists($file)) {
             $str = strtolower(PATHINFO($file)['extension'])=='php' ? trim(preg_replace('/^'.preg_quote(self::$obfuscator).'/','',file_get_contents($file))) : file_get_contents($file);
             $temp = preg_split('/\r\n|\r|\n/', $str);
@@ -23,8 +19,9 @@ class CSVHelper
                 $rows[] = explode(',',$line);
             }
         };
-
+        
         if(!isset($offset)) return $rows;
+        //parcing if we have optional arguments
 		$count=0;
 		$started=false;
 		$out=[];
@@ -38,8 +35,8 @@ class CSVHelper
 		}
 		return $out;
     }
-    //we use PHP build in method fputcsv, but it doesn't work well with empyty arrays so we use fwrite() and format our own csv instead
-    //arrayToCsv() takes url, reads file referenced by url and returns array
+
+    //writes a thing, either as an append or either as overwriting, takes associative arrays as well with assoc parameter option. 
     static function write($file, $data,$assoc=false,$overwrite=false)
     {   
         if(!isset($data))return false;
@@ -48,7 +45,7 @@ class CSVHelper
         if(!$overwrite && file_exists($file)) {
             $rows = self::read($file);
         };
-        
+        //we parse assoc arrays differently 
         if(!$assoc){
 			if(isset($data[0])) foreach($data as $row1) array_push($rows,$row1);
 			else array_push($rows,$data);
@@ -64,7 +61,7 @@ class CSVHelper
         fclose($fp);
     }
 
-    //Takes url and index and returns the line of the file referenced by the index. File must be formated csv
+    //Takes url to file and index and filter and returns an array with some element in the filter. If $filter is an array, we can specify more detail what we are looking for. 
     static function find($file, $filter,$limit=null)
     {
         if(!file_exists($file)) return [];
@@ -100,7 +97,7 @@ class CSVHelper
         fclose($h);
     }
 
-
+    //Either turns a line into null, or completely unset the entry. 
     static function delete($file,$index=null,$assoc=false,$wipe=false)
     {
 		if(!file_exists($file)) return false;

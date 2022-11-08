@@ -1,6 +1,7 @@
 <?php
 //placeholder code
 class JSONHelper{
+	//trimmmed some optional parameter options from certain methods of convinience. 
 	private static $obfuscator='<?php die() ?>';
 	
 	static function write($file,$data,$assoc=false,$overwrite=false){
@@ -35,12 +36,13 @@ class JSONHelper{
 		$count=0;
 		$started=false;
 		$out=[];
+		#assoc as offset number is not included as we would have an additional parameter option and I have already made CSVHelper and EntityHelper. 
 		foreach($rows as $k=>$v){
 			if($k==$offset) $started=true;
 			if($started){
 				$out[$k]=$v;
 				$count++;
-				if($count==$limit) break;
+				if($count==$limit) break;#this was implemented
 			}
 		}
 		return $out;
