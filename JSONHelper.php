@@ -15,7 +15,6 @@ class JSONHelper{
 			if(isset($data[0])) foreach($data as $row) $rows[]=$row;
 			else $rows[]=$data;
 		}else foreach($data as $k=>$v) $rows[$k]=$v;
-		print_r($rows);
 		$h=fopen($file,'w+');
 		if(!flock($h,LOCK_EX|LOCK_NB)) return false;
 		if(strtolower(PATHINFO($file)['extension'])=='php') fwrite($h,self::$obfuscator."\n");
@@ -24,7 +23,7 @@ class JSONHelper{
 		return true;
 	}
 
-	static function read($file,$offset=null,$limit=null,$skipblanks=false){
+	static function read($file,$offset=null,$limit=null){
 		if(!file_exists($file)) return [];
 		if(!isset(PATHINFO($file)['extension'])) return [];
 		$rows=json_decode(strtolower(PATHINFO($file)['extension'])=='php' ? trim(str_replace(self::$obfuscator,'',file_get_contents($file))) : file_get_contents($file),true);
@@ -36,8 +35,6 @@ class JSONHelper{
 		$count=0;
 		$started=false;
 		$out=[];
-		$is_assoc=self::is_assoc($rows);
-		//TODO: rad associative array as numeric offset 
 		foreach($rows as $k=>$v){
 			if($k==$offset) $started=true;
 			if($started){
@@ -60,6 +57,7 @@ class JSONHelper{
 				foreach($filter as $k=>$v) if(!isset($record[$k]) || $record[$k]!=$v) $found=false;
 				if($found) $out[$count]=$record;
 			}else foreach($record as $k=>$v) if($v==$filter) $out[$count]=$record;
+			if($limit!=null &&$count>=$limit)break;
 			$count++;
 		}
 		return $out;
@@ -105,12 +103,6 @@ class JSONHelper{
 		fclose($h);
 		return true;
 	}
-	
-	private static function is_assoc($array){
-		$keys=array_keys($array);
-		return $keys!==array_keys($keys);
-	}
-	
 	private static function reset($file){
 		if(file_exists($file)) rename($file,str_replace('.json','_backup_'.date('Y-m-d_h_i_s').'.json',$file));
 	}
