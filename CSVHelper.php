@@ -1,7 +1,7 @@
 <?php
 class CSVHelper
 {
-    
+    private static $obfuscator='<?php die() ?>';
     //to-do: turn this into a class
     //we use PHP built in fgetcsv method.
     //We check a few conditions and turn blank lines into empty arrays to avoid NULLs when converting from array back to csv
@@ -39,28 +39,22 @@ class CSVHelper
     }
     //we use PHP build in method fputcsv, but it doesn't work well with empyty arrays so we use fwrite() and format our own csv instead
     //arrayToCsv() takes url, reads file referenced by url and returns array
-    static function write($file, $data)
+    static function write($file, $data,$assoc=false,$overwrite=false)
     {   
         if(!isset($data))return false;
 
         // Open a file in write mode ('w')
         $fp = fopen($file, 'w');
+        $rows=[];
+        if(!$assoc){
+			if(isset($data[0])) foreach($data as $row) $rows[]=$row;
+			else $rows[]=$data;
+		}else foreach($data as $k=>$v) $rows[$k]=$v;
+        print_r($rows);
         // Loop through file pointer and a line
-        for ($j = 0; $j < count($data); $j++) {
-            $fields = $data[$j];
-            for ($i = 0; $i < count($fields); $i++) {
-                if ($i != count($fields) - 1) {
-                    fwrite($fp, $fields[$i] . ',');
-                } else
-                    fwrite($fp, $fields[$i]);
-            }
-
-            if ($j < count($data) - 1) {
-                fwrite($fp, PHP_EOL); #we do not create new line if all data has already been written.
-            }
+        foreach ($rows as $fields) {
+            fputcsv($fp, $fields);
         }
-
-
         fclose($fp);
     }
 

@@ -15,6 +15,7 @@ class JSONHelper{
 			if(isset($data[0])) foreach($data as $row) $rows[]=$row;
 			else $rows[]=$data;
 		}else foreach($data as $k=>$v) $rows[$k]=$v;
+		print_r($rows);
 		$h=fopen($file,'w+');
 		if(!flock($h,LOCK_EX|LOCK_NB)) return false;
 		if(strtolower(PATHINFO($file)['extension'])=='php') fwrite($h,self::$obfuscator."\n");
